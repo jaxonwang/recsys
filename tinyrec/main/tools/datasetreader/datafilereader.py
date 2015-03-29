@@ -1,14 +1,18 @@
-
+#this python script is to read the data from file to memory, and provied a itorater to retrive them.
 class Reader:
 
         filepath = None
         filehandle = None
         readbuffer = None
         iterator = None
+        pattern = None  #how to get a record and how a record is organized. Used for find a record
+        fieldname = None #the name for each field of a record, strored as a list
 
-        def __init__(self,filepath):
+        def __init__(self,filepath,pattern,fieldname):
                 self.filepath = filepath
                 self.__read_all()
+                self.pattern = pattern
+                self.fieldname = fieldname[:]
         
         def __read_all(self):
                 with open(self.filepath) as self.filehandle:
@@ -39,7 +43,20 @@ class Iterator:
         def get_all(self):
                 return self.reader.get_onle
 
-        #return (user,movie,rate,time)
+        #Using the pattern described in Reader, and return a tuple according to the filed name list. 
+        def get_next_dict(self):
+                if self.rawrecordlist == []:
+                        return None
+                rawrecord = self.rawrecordlist.pop()
+                tmplist = rawrecord.strip().split('\t')
+          
+                retdict = {}
+                for i in range(0,len(tmplist)):
+                    retdict[self.reader.fieldname[i]] = tmplist[i]
+
+                return retdict
+                
+
         def get_next(self):
                 if self.rawrecordlist == []:
                         return None
@@ -48,11 +65,6 @@ class Iterator:
           
                 return (int(tmplist[0]),int(tmplist[1]),float(tmplist[2]),int(tmplist[3]))
                 
-                #no using Record class for performance perpose
-                '''
-                return Record(tmplist[0],tmplist[1],tmplist[2],tmplist[3]) 
-                return Record()
-                '''
 
 class Record:
 

@@ -1,0 +1,13 @@
+[global]
+
+
+[database]
+ip = 127.0.0.1
+port = 6379
+db = 0
+;username = username
+;password = password
+
+[dataset]
+maxuserid = 944 	;avilable only when id is continous
+maxitemid = 1683 	;avilable only when id is continous
