@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "mem.h"
 #include "linkedlist.h"
 
 
@@ -15,7 +14,6 @@ struct s_LinkedList{
 	struct s_LinkedListNode * head;
 	struct s_LinkedListNode * tail;
 	struct s_LinkedListNode * curser;
-	struct s_obj_list * mem_obj;		//for mem gc
 	int list_length;
 
 };
@@ -23,12 +21,11 @@ struct s_LinkedList{
 LinkedList * new_Linked_list(){
 	//new list
 	LinkedList * n_list = (LinkedList * )malloc(sizeof(LinkedList));
-	//new mem_gc_obj
-	n_list->mem_obj = init_objlist();
-
 	//new head
 	LinkedListNode * n_head = (LinkedListNode *)malloc(sizeof(LinkedListNode));
-	append_to_list(n_list->mem_obj, n_head);
+
+	if(!n_list || ! n_head)
+		return NULL;
 	n_head->next = NULL;
 	n_head->previous = NULL;
 
@@ -40,15 +37,18 @@ LinkedList * new_Linked_list(){
 	return n_list;
 }
 
-void list_append(LinkedList * list,void *data){
+int list_append(LinkedList * list,void *data){
 	LinkedListNode * node = (LinkedListNode *)malloc(sizeof(LinkedListNode));
-	append_to_list(list->mem_obj,node);
+	if(!node)
+		return -1;
 
 	list->tail->next = node;
 	node->previous = list->tail;
 	node->data = data;
 	list->tail = node;
 	list->list_length++;
+
+	return 0;
 }
 
 void * list_iterator_next(LinkedList * list){
@@ -58,6 +58,18 @@ void * list_iterator_next(LinkedList * list){
 		list->curser = list->curser->next;
 		return list->curser->data;	
 	}
+}
+
+void list_iterator_reset(LinkedList * list){
+	list->curser = list->head;
+}
+
+LinkedListNode * list_iterator_getcursor(LinkedList * list){
+	return list->curser;
+}
+
+void list_iterator_setcursor(LinkedList * list, LinkedListNode * cur ){
+	list->curser = cur;
 }
 
 int list_get_len(LinkedList * l){
@@ -73,7 +85,14 @@ inline LinkedListNode * list_get_previous(LinkedListNode * node){
 }
 
 void destory_linked_list(LinkedList * list){
-	destroy_objlist(list->mem_obj);
+
+	LinkedListNode * pre = list->head;
+	LinkedListNode * current;
+	while((current = pre->next) != NULL){
+		free(pre);
+		pre = current;
+	}
+	free(pre);
 	free(list);
 }
 

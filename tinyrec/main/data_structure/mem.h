@@ -24,6 +24,7 @@ mem_obj_list * init_objlist(){
 	objlist->size = INITIAL_LIST_VALUE;
 	objlist->stored = 0;
 	objlist->list = (void *(*)[])malloc(sizeof(void *) * INITIAL_LIST_VALUE);
+	return objlist;
 }
 
 //append to mem obj list

@@ -6,7 +6,9 @@ directpath = os.getcwd().strip('/').split('/')
 for i in range(0,len(directpath))[::-1]:
     if directpath[i] == 'tinyrec':
         sys.path.append(os.path.join("/",*directpath[0:i+1]) + "/main/info")
+        sys.path.append(os.path.join("/",*directpath[0:i+1]) + "/main/data_structure")
 	break
+import vector
 import config
 
 import numpy as np 
