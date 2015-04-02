@@ -3,3 +3,6 @@ ml-100k/
 
 #pyc
 *.pyc
+
+#vim swap file
+#*.swp
