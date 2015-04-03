@@ -259,6 +259,7 @@ static PyObject * pearsonr(PyObject * self,PyObject *args){
 			Ex2 += cell_x->value * cell_x->value;
 			cell_x = list_iterator_next(x->storelist);	
 		}else{
+	//		printf("x %d\ty %d\n",index_x,index_y);
 			Ex += cell_x->value;
 			Ex2 += cell_x->value * cell_x->value;
 			Ey += cell_y->value;
