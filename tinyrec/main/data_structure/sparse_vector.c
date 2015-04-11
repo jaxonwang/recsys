@@ -231,6 +231,9 @@ static PyObject * pearsonr(PyObject * self,PyObject *args){
 		PyErr_SetString(PyExc_ValueError,"Different vector length.");
 		return NULL;
 	}
+
+	if((int)PyTuple_GetItem(args,2) && PyInt_AsLong(PyTuple_GetItem(args,2)) == 1)
+		size--; 	//id start from 1
 	
 	double Ex = 0;
 	double Ey = 0;
@@ -288,8 +291,13 @@ static PyObject * pearsonr(PyObject * self,PyObject *args){
 	return Py_BuildValue("f",personr);
 } 
 
+
 static PyMethodDef vector_methods[] = {
-	{"pearsonr", pearsonr,METH_VARARGS,"Calculate person correlation."},
+	{"pearsonr", pearsonr,METH_VARARGS, "pearsonr(sparsevector_x,sparsevector_y,startfromone = False) --> pearson correlation value\n\
+if startfromone is True, the index will start from one, that is\n\
+the length of the vectors will minus by one.\n"
+	},
+
        	{NULL}  /* Sentinel */
 };
 

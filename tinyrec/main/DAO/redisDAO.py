@@ -1,15 +1,8 @@
 import redis
 import sys,os,time
 
-#get absolute path
-directpath = os.getcwd().strip('/').split('/')
-for i in range(0,len(directpath))[::-1]:
-    if directpath[i] == 'tinyrec':
-        sys.path.append(os.path.join("/",*directpath[0:i+1]) + "/main/info")
-        sys.path.append(os.path.join("/",*directpath[0:i+1]) + "/main/data_structure")
-	break
-import vector
-import config
+from main.info import config
+from main.data_structure import vector
 
 import numpy as np 
 from scipy.sparse import *
@@ -27,19 +20,22 @@ class redisDAO():
         self.conn = redis.Redis(ip,port,db)
 
     def get_item_list_by_user(self,userid):
-        return self.conn.hgetall("u" + str(userid))
+        rawdict = self.conn.hgetall("u" + str(userid))
+        return [(int(i), float(r)) for (i,r) in rawdict.items()]
 
     def get_user_lsit_by_item(self,itemid):
-        return self.conn.hgetall("i" + str(itemid))
+
+        rawdict = self.conn.hgetall("i" + str(itemid))
+        return [(int(u), float(r)) for (u,r) in rawdict.items()]
 
     def get_rate(self,userid,itemid):
-        return self.conn.hget("u" + str(userid),itemid)
+        return float(self.conn.hget("u" + str(userid),itemid))
 
     def get_user_rating_num(self,userid):
-	return self.conn.hlen("u" + str(userid))
+	return int(self.conn.hlen("u" + str(userid)))
 	
     def get_item_rating_num(self,itemid):
-	return self.conn.hlen("i" + str(itemid))
+	return (self.conn.hlen("i" + str(itemid)))
 
     def put_user_nearest(self,userid,otheruser,sim):
         return self.conn.zadd("u_sim_" + str(userid), sim, otheruser)
