@@ -37,11 +37,35 @@ class redisDAO():
     def get_item_rating_num(self,itemid):
 	return (self.conn.hlen("i" + str(itemid)))
 
-    def put_user_nearest(self,userid,otheruser,sim):
-        return self.conn.zadd("u_sim_" + str(userid), sim, otheruser)
+    def put_user_sim(self,userid,otheruser,sim):
+        return self.conn.zadd("u_sim_" + str(userid), otheruser, sim)
 
-    def put_item_nearest(self,itemid,otheritem,sim):
-        return self.conn.zadd("i_sim_" + str(itemid), sim, otheritem)
+    def get_user_sim_list(self,userid,k,bydesc = True):
+        l = self.conn.zrange("u_sim_" + str(userid), 0, k, \
+                desc = bydesc, withscores = True)
+        l =[(int(i), sim) for (i, sim) in l]
+        return l
+
+    def put_item_sim(self,itemid,otheritem,sim):
+        return self.conn.zadd("i_sim_" + str(itemid), otheritem, sim)
+
+    def get_item_sim_list(self,itemid,k,bydesc = True):
+        l = self.conn.zrange("i_sim_" + str(itemid), 0, k, \
+                desc = bydesc, withscores = True)
+        l =[(int(i), sim) for (i, sim) in l]
+        return l
+
+    def del_user_sim(self,userid):
+        return self.conn.delete("u_sim_" + str(userid))
+
+    def del_item_sim(self,itemid):
+        return self.conn.delete("i_sim_" + str(itemid))
+
+    def del_all_user_sim(self):
+        return self.conn.delete("u_sim_*")
+
+    def del_all_item_sim(self):
+        return self.conn.delete("i_sim_*")
 
 
 def pearsion_correlation(x,y):
@@ -82,20 +106,6 @@ def raw_to_sparse_matrix(raw_record , matrix_len):
     return csr_matrix((data_list,(row,col_list)),shape = (1,matrix_len))
 
     
-def raw_to_my_sparse_matrix(raw_record , matrix_len):
-
-    col_list = []
-    data_list = []
-    sortedlist = [(int(k),v) for (k,v) in raw_record.items()]
-    sortedlist.sort()
-
-    for k,v in sortedlist:
-        col_list.append(int(k))
-        if k >= matrix_len:
-            raise ValueError("too short marix length")
-        data_list.append(float(v))
-
-    return vector.SparseVector(col_list,data_list,matrix_len);
 
 if __name__ == "__main__":
 	rDAO = redisDAO()
@@ -105,7 +115,6 @@ if __name__ == "__main__":
 	    rDAO.get_item_list_by_user(i)
 	for i in range(0,dscfg['maxitemid']):
 	    rDAO.get_user_lsit_by_item(i)
-        '''
     
         raw_record_x = rDAO.get_item_list_by_user(44)
 
@@ -119,17 +128,8 @@ if __name__ == "__main__":
                 sima.append((i,pearsion_correlation(x,y)))
 
         t2 = time.clock()
-        x = raw_to_my_sparse_matrix(raw_record_x,1683)
-
-        simb = []
-	for i in range(1,dscfg['maxuserid']):
-                raw_record_y = rDAO.get_item_list_by_user(i)
-                y = raw_to_my_sparse_matrix(raw_record_y,1683)
-                simb.append((i,vector.pearsonr(x,y)))
-        t3 = time.clock()
-
-        print t2 - t1, t3 - t2
         sima.sort(key = lambda sim:sim[1],reverse = True)
-        simb.sort(key = lambda sim:sim[1],reverse = True)
         print sima[:200]
-        print simb[:200]
+        '''
+        print rDAO.get_user_sim_list(44,111) 
+

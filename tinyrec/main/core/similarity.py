@@ -1,17 +1,20 @@
+import time
+from multiprocessing import Process
 
 from main.info import config
 from main.data_structure import vector
 
+
+def to_sparse_vector(vec, vector_len):
+    index_list = [i for (i,v) in vec]
+    data_list = [v for (i,v) in vec]
+    if index_list[-1] >= vector_len:
+        raise ValueError("too short length:" + \
+                str(vector_len) + " for index :" + str(index_list[-1]))
+    return vector.SparseVector(index_list, data_list, vector_len)
+
 #receive two list as vector
 def my_sparse_vector_pearsonr_similarity(vectora,vectorb,vec_len):
-    
-    def to_sparse_vector(vec, vector_len):
-        index_list = [i for (i,v) in vec]
-        data_list = [v for (i,v) in vec]
-        if index_list[-1] >= vec_len:
-            raise ValueError("too short length:" + \
-                    str(vector_len) + " for index :" + str(index_list[-1]))
-        return vector.SparseVector(index_list, data_list, vector_len)
 
     vectora.sort()
     vectorb.sort()
@@ -20,13 +23,14 @@ def my_sparse_vector_pearsonr_similarity(vectora,vectorb,vec_len):
     sparsevecb = to_sparse_vector(vectorb,vec_len)
 
     startfromone = not startfromzero
-    return vector.pearsonr(sparseveca,sparsevecb,startfromone)
+    return abs(vector.pearsonr(sparseveca,sparsevecb,startfromone))
 
 storetype = config.Config().configdict['global']['storage']
 similaritytype = config.Config().configdict['global']['similarity']
 maxitemid = config.Config().configdict['dataset']['maxitemid'] 
 maxuserid = config.Config().configdict['dataset']['maxuserid'] 
 startfromzero = config.Config().configdict['dataset']['startfromzero'] 
+multithread = config.Config().configdict['global']['multithread'] 
 
 #get config
 #get the DAO interface
@@ -39,34 +43,82 @@ if similaritytype == 'pearson':
     #similarity func must receivce two lists representing vector as [(index,value),...] and a vector length
     similarity_func = my_sparse_vector_pearsonr_similarity
 
-def get_k_nearest_users(userid):
+def get_k_nearest_users(userid, dao, k = 200):
     '''
 return a the k nearest users list in reverse order for a given userid 
 these returned ids are searched in the whole user domain
 ex get_k_nearest_users(55) -> [(22,0.99),(657,0.96)...]
     '''
-    dao = new_DAO_interface()
     nearestlist = []
     start = 0 if startfromzero else 1 #whether id start from zero
-    print startfromzero
     user = dao.get_item_list_by_user(userid)
     
     for i in range(start,maxuserid + 1):
+        if i == userid:
+            continue
         user_i = dao.get_item_list_by_user(i)
         nearestlist.append((i,similarity_func(user,user_i,maxitemid + 1)))
-    nearestlist.sort(reverse = True)
-    return nearestlist
-        
+    nearestlist.sort(key = lambda nearestlist:nearestlist[1], reverse = True)
+    return nearestlist[:k]
+
+def all_user_similarity():
+    '''
+    calculate all user similarity and put to the datasore through DAO
+    '''
+
+    devide_number = multithread
+    start = 0 if startfromzero else 1 #whether id start from zero
+    total = maxuserid + 1 - start
+    proclist = []
+    for i in range(0,devide_number):
+        end = start + total / 8
+        if end > maxuserid or i == devide_number - 1:
+            end = maxuserid + 1
+
+        p = Process(target = user_similarity_in_range,args = (start,end))
+        proclist.append(p)
+        p.start()
+        start = end
+
+    for p in proclist:
+        p.join()
+
+def user_similarity_in_range(start,end):
+    dao = new_DAO_interface()
+
+    for userid in range(start,end):
+        simlist = get_k_nearest_users(userid, dao)
+        for otheruserid,sim in simlist:
+            dao.put_user_sim(userid,otheruserid,sim)
+        print "User:" + str(userid) + " neighborhood similarity calculated."
+
     
+def clean_all_user_sim():
+    print "Clearning previous calculated similarity."
+    dao = new_DAO_interface()
+
+    start = 0 if startfromzero else 1 #whether id start from zero
+    for userid in range(start,maxuserid + 1):
+        dao.del_user_sim(userid)
+    print "All cleared."
+
+
 def new_DAO_interface():
     return DAOtype()
 
 if __name__ == "__main__":
+    clean_all_user_sim()
+
     dao = new_DAO_interface()
+    
+    t1 = time.time()
 
-    a = dao.get_item_list_by_user(44)
-    b = dao.get_item_list_by_user(57)
+    all_user_similarity() 
 
-    print my_sparse_vector_pearsonr_similarity(a,b,maxitemid+1)
+    t2 = time.time()
 
-    print get_k_nearest_users(44)
+    print "Finished in time :",t2 - t1,"s"
+
+
+
+

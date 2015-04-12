@@ -45,6 +45,7 @@ int list_append(LinkedList * list,void *data){
 	list->tail->next = node;
 	node->previous = list->tail;
 	node->data = data;
+	node->next = NULL;
 	list->tail = node;
 	list->list_length++;
 

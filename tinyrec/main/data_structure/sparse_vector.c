@@ -113,7 +113,7 @@ typedef struct {
 
 
 static void SparseVector_dealloc(SparseVectorObject * self){
-	//destroy_sparse_vec(self->sv);
+	destroy_sparse_vec(self->sv);
 	self->ob_type->tp_free((PyObject*)self);
 }
 static PyObject * SparseVector_str(PyObject * pyobj){
@@ -175,8 +175,11 @@ static int SparseVector_init(PyObject * type, PyObject *args, PyObject *kwds){
 	}
 	
 	self->sv = new_sparse_vector(tmp_indices,tmp_values,indiceslen,vectorlen);
+
 	if(!self->sv){
 		PyErr_NoMemory();
+		free(tmp_indices);
+		free(tmp_values);
 		return -1;
 	}
 

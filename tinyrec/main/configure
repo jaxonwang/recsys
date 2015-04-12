@@ -2,7 +2,7 @@
 
 storage = redis 	;redis, or others. The place where data are stored during processing.
 similarity = pearson 	;pearson for pearson correlation. cos for cosine
-			
+multithread = auto 	;multi-thread optimization. auto config or manually assign a number of concurrency task
 
 [database]
 ip = 127.0.0.1
@@ -15,3 +15,5 @@ db = 0
 maxuserid = 943 	;avilable only when id is continous,id can equal to this
 maxitemid = 1682 	;avilable only when id is continous,data need to be pre processed first.
 startfromzero = False 	;id start from zero if Ture else start from one
+
+

@@ -25,7 +25,8 @@ class Config(object):
     cfg_validate_matrix = {\
             'global':{\
                     'storage':['redis'],
-                    'similarity':['pearson','cos']},
+                    'similarity':['pearson','cos'],
+                    'multithread':'str'},
             'database':{\
                     'ip':       'str',
                     'port':     'int',
@@ -49,11 +50,14 @@ class Config(object):
             for i in cfgparser.items(s):
                 self.configdict[s][i[0]] = i[1]
         self.config_validater()
+        self.set_multi_task_optimize_number()
+
 
     def config_validater(self):
         for section in self.cfg_validate_matrix:
             for field in self.cfg_validate_matrix[section]:
-                iscfged = field in self.configdict[section] #existing of section already checked
+                iscfged = field in self.configdict[section] \
+                        and self.configdict[section] != ''#existing of section already checked
                 ccvm = self.cfg_validate_matrix[section][field]
                 if 'null' not in ccvm:#can not be null
                     if not iscfged:
@@ -75,8 +79,14 @@ class Config(object):
         elif totype == "long":
             self.configdict[section][field] = long(self.configdict[section][field])
         elif totype == "bool":
-            self.configdict[section][field] = bool(self.configdict[section][field])
+            self.configdict[section][field] = True if self.configdict[section][field] == "True" else False
 
+    def set_multi_task_optimize_number(self):
+        get_cpu_num_cmd = "cat /proc/cpuinfo|grep processor |wc -l"
+        if self.configdict['global']['multithread'] == 'auto':
+            out = os.popen(get_cpu_num_cmd).readlines()[0]
+            self.configdict['global']['multithread'] = out
+        self.__to_type('global','multithread','int')
 
     def print_all(self):
         for j in self.configdict:
@@ -88,7 +98,6 @@ if __name__ == "__main__":
     cfg = Config()
     cfg.print_all()
 
-    cfg.config_validater()
     pprint(cfg.configdict)
 
 
