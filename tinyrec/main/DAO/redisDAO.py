@@ -29,7 +29,11 @@ class redisDAO():
         return [(int(u), float(r)) for (u,r) in rawdict.items()]
 
     def get_rate(self,userid,itemid):
-        return float(self.conn.hget("u" + str(userid),itemid))
+
+        ret = self.conn.hget("u" + str(userid),itemid)
+        if ret:     #record exist
+            return float(ret)
+        return ret
 
     def get_user_rating_num(self,userid):
 	return int(self.conn.hlen("u" + str(userid)))

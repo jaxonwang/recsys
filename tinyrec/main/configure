@@ -1,8 +1,15 @@
 [global]
 
 storage = redis 	;redis, or others. The place where data are stored during processing.
-similarity = pearson 	;pearson for pearson correlation. cos for cosine
 multithread = auto 	;multi-thread optimization. auto config or manually assign a number of concurrency task
+
+[user-based_CF] 	;collaboratiive filter config
+similarity = pearson 	;pearson for pearson correlation. cos for cosine
+neighborsize_K = 70 	
+neighbormodel = knn 	;{knn, others}
+baseline_predictor = mean ;{mean,BP1,BP2.BP3} to decrease factors other than relations
+
+
 
 [database]
 ip = 127.0.0.1

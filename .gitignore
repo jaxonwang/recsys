@@ -1,5 +1,5 @@
 #dataset.no need to add
-ml-100k/
+ml*/
 
 #pyc
 *.pyc

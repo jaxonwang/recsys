@@ -5,13 +5,13 @@ class Reader:
         filehandle = None
         readbuffer = None
         iterator = None
-        pattern = None  #how to get a record and how a record is organized. Used for find a record
+        separator = None  #how to get a record and how a record is organized. Used for find a record
         fieldname = None #the name for each field of a record, strored as a list
 
-        def __init__(self,filepath,pattern,fieldname):
+        def __init__(self,filepath,separator,fieldname):
                 self.filepath = filepath
                 self.__read_all()
-                self.pattern = pattern
+                self.separator = separator
                 self.fieldname = fieldname[:]
         
         def __read_all(self):
@@ -43,12 +43,12 @@ class Iterator:
         def get_all(self):
                 return self.reader.get_onle
 
-        #Using the pattern described in Reader, and return a tuple according to the filed name list. 
+        #Using the separator described in Reader, and return a tuple according to the filed name list. 
         def get_next_dict(self):
                 if self.rawrecordlist == []:
                         return None
                 rawrecord = self.rawrecordlist.pop()
-                tmplist = rawrecord.strip().split('\t')
+                tmplist = rawrecord.strip().split(self.reader.separator)
           
                 retdict = {}
                 for i in range(0,len(tmplist)):
@@ -61,9 +61,9 @@ class Iterator:
                 if self.rawrecordlist == []:
                         return None
                 rawrecord = self.rawrecordlist.pop()
-                tmplist = rawrecord.strip().split('\t')
+                tmplist = rawrecord.strip().split(self.reader.separator)
           
-                return (int(tmplist[0]),int(tmplist[1]),float(tmplist[2]),int(tmplist[3]))
+                return tmplist
                 
 
 class Record:
@@ -79,11 +79,11 @@ class Record:
                                 % (self.user, self.movie, self.rate, self.timestamp)    
         
 if __name__ == "__main__":
-        reader = Reader("/Users/chenjunda/wang/recsys/ml-100k/nimabibitest")
+        reader = Reader("/home/wjx/recsys/ml-1m/ratings.dat","::",['user','movie','rate','time'])
         it = reader.get_iterator()
         while True:
-                record = it.get_next()
+                record = it.get_next_dict()
                 if record == None:
                         break
-                record.printrecord()
-        
+                print record
+

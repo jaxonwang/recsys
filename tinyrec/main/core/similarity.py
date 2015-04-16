@@ -26,7 +26,7 @@ def my_sparse_vector_pearsonr_similarity(vectora,vectorb,vec_len):
     return abs(vector.pearsonr(sparseveca,sparsevecb,startfromone))
 
 storetype = config.Config().configdict['global']['storage']
-similaritytype = config.Config().configdict['global']['similarity']
+similaritytype = config.Config().configdict['user-based_CF']['similarity']
 maxitemid = config.Config().configdict['dataset']['maxitemid'] 
 maxuserid = config.Config().configdict['dataset']['maxuserid'] 
 startfromzero = config.Config().configdict['dataset']['startfromzero'] 

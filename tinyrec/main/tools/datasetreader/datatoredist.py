@@ -18,7 +18,7 @@ cfgdb = dbcfg['db']
 
 def to_redis(filereader,ip = cfgip,port = cfgport,db=cfgdb):
 
-    reader = RD.Reader("../../../../ml-100k/u.data","",['user','movie','rate','time'])
+    reader = RD.Reader("../../../../ml-100k/u.data","\t",['user','movie','rate','time'])
 
     it = reader.get_iterator()
 

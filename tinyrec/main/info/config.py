@@ -25,7 +25,6 @@ class Config(object):
     cfg_validate_matrix = {\
             'global':{\
                     'storage':['redis'],
-                    'similarity':['pearson','cos'],
                     'multithread':'str'},
             'database':{\
                     'ip':       'str',
@@ -37,6 +36,11 @@ class Config(object):
                     'maxuserid':'int',
                     'maxitemid':'int',
                     'startfromzero':'bool'},
+            'user-based_CF':{\
+                    'similarity':['pearson','cos'],
+                    'neighborsize_k':'int',
+                    'neighbormodel' :['knn'],
+                    'baseline_predictor':['mean','BP1','BP2','BP3']}
             }
 
     section = [s for s in cfg_validate_matrix] 
