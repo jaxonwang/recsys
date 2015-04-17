@@ -2,19 +2,20 @@ import redis
 import sys,os,time
 
 from main.info import config
-from main.data_structure import vector
 
-import numpy as np 
-from scipy.sparse import *
 
 ######get_config
-dbcfg = config.Config().configdict['database']
-cfgip = dbcfg['ip']
-cfgport = dbcfg['port']
-cfgdb = dbcfg['db']
+def get_config():
+    global dbcfg, cfgip, cfgport, cfgdb
+    dbcfg = config.Config().configdict['database']
+    cfgip = dbcfg['ip']
+    cfgport = dbcfg['port']
+    cfgdb = dbcfg['db']
+
+get_config()
+config.Config().register_function(get_config)
 
 class redisDAO():
-
 
     def __init__(self,ip = cfgip,port = cfgport,db=cfgdb):
         self.conn = redis.Redis(ip,port,db)
@@ -65,11 +66,8 @@ class redisDAO():
     def del_item_sim(self,itemid):
         return self.conn.delete("i_sim_" + str(itemid))
 
-    def del_all_user_sim(self):
-        return self.conn.delete("u_sim_*")
-
-    def del_all_item_sim(self):
-        return self.conn.delete("i_sim_*")
+    def del_all_keys(self):
+        return self.conn.flushdb()
 
 
 def pearsion_correlation(x,y):

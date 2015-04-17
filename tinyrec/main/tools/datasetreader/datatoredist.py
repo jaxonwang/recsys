@@ -1,15 +1,21 @@
 import sys,time
 import redis
-sys.path.append('../../tools/datasetreader/')
-sys.path.append("../../info/")
-import datafilereader as RD
-import config 
+import main.tools.datasetreader.datafilereader as RD
+import main.info.config as config
 
 ######get_config
-dbcfg = config.Config().configdict['database']
-cfgip = dbcfg['ip']
-cfgport = dbcfg['port']
-cfgdb = dbcfg['db']
+def get_config():
+    global dbcfg, cfgip, cfgport, cfgdb, data_path, data_sp, data_ptn
+    dbcfg = config.Config().configdict['database']
+    cfgip = dbcfg['ip']
+    cfgport = dbcfg['port']
+    cfgdb = dbcfg['db']
+    data_path = config.Config().configdict['dataset']['datafile_path']
+    data_sp = config.Config().configdict['dataset']['datafile_seperator']
+    data_ptn = config.Config().configdict['dataset']['datafile_pattern']
+
+get_config()
+config.Conifg().register_function(get_config)
 
 #################
 #db schema:
@@ -18,7 +24,7 @@ cfgdb = dbcfg['db']
 
 def to_redis(filereader,ip = cfgip,port = cfgport,db=cfgdb):
 
-    reader = RD.Reader("../../../../ml-100k/u.data","\t",['user','movie','rate','time'])
+    reader = RD.Reader(data_path,data_sp,data_ptn)
 
     it = reader.get_iterator()
 
@@ -33,11 +39,10 @@ def to_redis(filereader,ip = cfgip,port = cfgport,db=cfgdb):
         pipe.hset("u"+str(record["user"]),record['movie'],record['rate'])
         pipe.hset("i"+str(record["movie"]),record['user'],record['rate'])
 
-    t2 = time.clock()
     pipe.execute()
-    t3 = time.clock()
+    t2 = time.clock()
 
-    print t2 - t1,t3 - t2
+    print "Data from %s imported to redis in : %fs" % (data_path, t2 - t1)
 
 if __name__ == "__main__":
     to_redis(RD)

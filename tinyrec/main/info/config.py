@@ -35,7 +35,12 @@ class Config(object):
             'dataset':{\
                     'maxuserid':'int',
                     'maxitemid':'int',
-                    'startfromzero':'bool'},
+                    'startfromzero':'bool',
+                    'datafile_path' :'str',
+                    'testfile_path' :'str',
+                    'testfile_dir'  :'str',
+                    'datafile_seperator':'py_type',
+                    'datafile_pattern':'py_type'},
             'user-based_CF':{\
                     'similarity':['pearson','cos'],
                     'neighborsize_k':'int',
@@ -44,6 +49,7 @@ class Config(object):
             }
 
     section = [s for s in cfg_validate_matrix] 
+    recall_func_list = []
 
     def __init__(self,cfgpath = config_file_path):
         cfgparser = ConfigParser.ConfigParser()
@@ -84,6 +90,21 @@ class Config(object):
             self.configdict[section][field] = long(self.configdict[section][field])
         elif totype == "bool":
             self.configdict[section][field] = True if self.configdict[section][field] == "True" else False
+        elif totype == "py_type":
+            raw = self.configdict[section][field]
+            exec("pyobj=" + raw)
+            self.configdict[section][field] = pyobj
+
+    def register_function(self,func):
+        '''
+        register function which run depends on the config.
+        recall it when config changed.
+        '''
+        self.recall_func_list.append(func)
+
+    def apply_changes(self):
+        for f in self.recall_func_list:
+            f()
 
     def set_multi_task_optimize_number(self):
         get_cpu_num_cmd = "cat /proc/cpuinfo|grep processor |wc -l"

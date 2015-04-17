@@ -25,23 +25,34 @@ def my_sparse_vector_pearsonr_similarity(vectora,vectorb,vec_len):
     startfromone = not startfromzero
     return abs(vector.pearsonr(sparseveca,sparsevecb,startfromone))
 
-storetype = config.Config().configdict['global']['storage']
-similaritytype = config.Config().configdict['user-based_CF']['similarity']
-maxitemid = config.Config().configdict['dataset']['maxitemid'] 
-maxuserid = config.Config().configdict['dataset']['maxuserid'] 
-startfromzero = config.Config().configdict['dataset']['startfromzero'] 
-multithread = config.Config().configdict['global']['multithread'] 
 
-#get config
-#get the DAO interface
-if storetype == 'redis':
-    from main.DAO import redisDAO
-    DAOtype = redisDAO.redisDAO
+def set_config():
 
-#get the similarity method
-if similaritytype == 'pearson':
-    #similarity func must receivce two lists representing vector as [(index,value),...] and a vector length
-    similarity_func = my_sparse_vector_pearsonr_similarity
+    global storetype, similaritytype, maxitemid  
+    global maxuserid, startfromzero, multithread 
+    global DAOtype, similarity_func
+
+    storetype = config.Config().configdict['global']['storage']
+    similaritytype = config.Config().configdict['user-based_CF']['similarity']
+    maxitemid = config.Config().configdict['dataset']['maxitemid'] 
+    maxuserid = config.Config().configdict['dataset']['maxuserid'] 
+    startfromzero = config.Config().configdict['dataset']['startfromzero'] 
+    multithread = config.Config().configdict['global']['multithread'] 
+
+    #get the DAO interface
+    if storetype == 'redis':
+        from main.DAO import redisDAO
+        DAOtype = redisDAO.redisDAO
+
+    #get the similarity method
+    if similaritytype == 'pearson':
+        #similarity func must receivce two lists representing vector as [(index,value),...] and a vector length
+        similarity_func = my_sparse_vector_pearsonr_similarity
+    else :
+        print "You should never goes into here! Baddly configed."
+
+set_config()
+config.Config().register_function(set_config)
 
 def get_k_nearest_users(userid, dao, k = 200):
     '''
@@ -66,6 +77,9 @@ def all_user_similarity():
     calculate all user similarity and put to the datasore through DAO
     '''
 
+    print "Calculating similarity for each user."
+    t1 = time.time()
+
     devide_number = multithread
     start = 0 if startfromzero else 1 #whether id start from zero
     total = maxuserid + 1 - start
@@ -83,6 +97,9 @@ def all_user_similarity():
     for p in proclist:
         p.join()
 
+    t2 = time.time()
+    print "All user's similarities have been claculated in %ds"%(t2 - t1)
+
 def user_similarity_in_range(start,end):
     dao = new_DAO_interface()
 
@@ -90,7 +107,7 @@ def user_similarity_in_range(start,end):
         simlist = get_k_nearest_users(userid, dao)
         for otheruserid,sim in simlist:
             dao.put_user_sim(userid,otheruserid,sim)
-        print "User:" + str(userid) + " neighborhood similarity calculated."
+        #print "User:" + str(userid) + " neighborhood similarity calculated."
 
     
 def clean_all_user_sim():

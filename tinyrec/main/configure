@@ -19,6 +19,11 @@ db = 0
 ;password = password
 
 [dataset]
+datafile_path = /tmp/haha/train_0.dat
+testfile_path = /tmp/haha/test_0.dat
+testfile_dir = //
+datafile_seperator = "\t"
+datafile_pattern = ['user','movie','rate','time']
 maxuserid = 943 	;avilable only when id is continous,id can equal to this
 maxitemid = 1682 	;avilable only when id is continous,data need to be pre processed first.
 startfromzero = False 	;id start from zero if Ture else start from one
