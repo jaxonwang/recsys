@@ -15,14 +15,14 @@ def get_config():
     data_ptn = config.Config().configdict['dataset']['datafile_pattern']
 
 get_config()
-config.Conifg().register_function(get_config)
+config.Config().register_function(get_config)
 
 #################
 #db schema:
 #1) user to item: hashtable, user:item:rate
 #2) item to user: hashtable, item:user:rate
 
-def to_redis(filereader,ip = cfgip,port = cfgport,db=cfgdb):
+def to_redis(ip = cfgip,port = cfgport,db=cfgdb):
 
     reader = RD.Reader(data_path,data_sp,data_ptn)
 
@@ -45,7 +45,7 @@ def to_redis(filereader,ip = cfgip,port = cfgport,db=cfgdb):
     print "Data from %s imported to redis in : %fs" % (data_path, t2 - t1)
 
 if __name__ == "__main__":
-    to_redis(RD)
+    to_redis()
 
 
     

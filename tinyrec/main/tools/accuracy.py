@@ -7,18 +7,7 @@ import main.info.config as config
 import main.tools.datasetreader.datafilereader as datafilereader
 
 
-def get_config():
-    global seperater, pattern_list, testfilepath
-    global multithread
-    seperater = config.Config().configdict['dataset']['datafile_seperator']
-    pattern_list = config.Config().configdict['dataset']['datafile_pattern']
-    testfilepath = config.Config().configdict['dataset']['testfile_path']
-    multithread = config.Config().configdict['global']['multithread']
-
-get_config()
-config.Config().register_function(get_config)
-
-def RMSE():
+def RMSE_single_process():
     count = 0
     biassquare = 0.
     it = datafilereader.Reader(testfilepath,seperater,pattern_list).get_iterator()
@@ -92,6 +81,29 @@ def RMSE_multi_process():
     
     return math.sqrt(total_bias / len(record_list))
 
+def get_config():
+    global seperater, pattern_list, testfilepath
+    global multithread, RMSE_func
+    seperater = config.Config().configdict['dataset']['datafile_seperator']
+    pattern_list = config.Config().configdict['dataset']['datafile_pattern']
+    testfilepath = config.Config().configdict['dataset']['testfile_path']
+    multithread = config.Config().configdict['global']['multithread']
+
+    if multithread == 1:
+        RMSE_func = RMSE_single_process
+    else:
+        RMSE_func = RMSE_multi_process
+
+get_config()
+config.Config().register_function(get_config)
+
+def RMSE():
+    print "Using file:%s to calculate RMSE."%(testfilepath)
+    t1 = time.time()
+    r = RMSE_func()
+    t2 = time.time()
+    print "RMSE calculated in %fs."%(t2 - t1)
+    return r
 
 def different_k():
     for i in range(140,65,-5):

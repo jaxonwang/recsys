@@ -19,9 +19,9 @@ db = 0
 ;password = password
 
 [dataset]
-datafile_path = /tmp/haha/train_0.dat
+datafile_path = /home/wjx/recsys/ml-100k/u.data
 testfile_path = /tmp/haha/test_0.dat
-testfile_dir = //
+testfile_dir = /tmp/haha
 datafile_seperator = "\t"
 datafile_pattern = ['user','movie','rate','time']
 maxuserid = 943 	;avilable only when id is continous,id can equal to this
