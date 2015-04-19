@@ -287,7 +287,7 @@ static PyObject * pearsonr(PyObject * self,PyObject *args){
 		Ey2 += cell_y->value * cell_y->value;
 		cell_y = list_iterator_next(y->storelist);
 	}
-//	printf("Ex %f\n Ey %f\n Exy %f\n Ex2 %f\n Ey2 %f\n",Ex,Ey,Exy,Ex2,Ey2);
+	//printf("Ex %f\n Ey %f\n Exy %f\n Ex2 %f\n Ey2 %f\n",Ex,Ey,Exy,Ex2,Ey2);
 
 	double personr = (Exy - Ex * Ey / size) / \
 			 sqrt((Ex2 - Ex * Ex / size) * (Ey2 - Ey * Ey / size ));

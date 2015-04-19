@@ -2,7 +2,8 @@ import time
 from multiprocessing import Process
 
 from main.info import config
-from main.data_structure import vector
+#from main.data_structure import vector as vector1
+from main.data_structure import sparseVector as vector
 
 
 def to_sparse_vector(vec, vector_len):
@@ -23,17 +24,22 @@ def my_sparse_vector_pearsonr_similarity(vectora,vectorb,vec_len):
     sparsevecb = to_sparse_vector(vectorb,vec_len)
 
     startfromone = not startfromzero
-    return abs(vector.pearsonr(sparseveca,sparsevecb,startfromone))
-
+    pearson = abs(pearsonr(sparseveca,sparsevecb,startfromone))
+    if significance_weight:
+        i = len(set([i for i,v in vectora]) & set([i for i,v in vectorb]))
+        if i < significance_weight:
+            pearson *= float(i) / float(significance_weight)
+    return pearson
 
 def set_config():
 
     global storetype, similaritytype, maxitemid  
     global maxuserid, startfromzero, multithread 
-    global DAOtype, similarity_func
+    global DAOtype, similarity_func, pearsonr, significance_weight
 
     storetype = config.Config().configdict['global']['storage']
     similaritytype = config.Config().configdict['user-based_CF']['similarity']
+    significance_weight= config.Config().configdict['user-based_CF']['significance_weight']
     maxitemid = config.Config().configdict['dataset']['maxitemid'] 
     maxuserid = config.Config().configdict['dataset']['maxuserid'] 
     startfromzero = config.Config().configdict['dataset']['startfromzero'] 
@@ -48,6 +54,13 @@ def set_config():
     if similaritytype == 'pearson':
         #similarity func must receivce two lists representing vector as [(index,value),...] and a vector length
         similarity_func = my_sparse_vector_pearsonr_similarity
+        pearsonr = vector.pearsonr
+    elif similaritytype == 'pearson_intersect':
+        similarity_func = my_sparse_vector_pearsonr_similarity
+        pearsonr = vector.pearsonr_hasvalue_both
+    elif similaritytype == 'pearson_default':
+        similarity_func = my_sparse_vector_pearsonr_similarity
+        pearsonr = vector.pearsonr_default_rate
     else :
         print "You should never goes into here! Baddly configed."
 

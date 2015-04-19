@@ -10,7 +10,7 @@ def predict_by_knn(dao,userid,itemid):
         r = dao.get_rate(u,itemid)  #get other users rate
         if r:
             other_user_rate_list.append((u,s,r)) #user, similarity, rate
-    if len(other_user_rate_list) == 0:
+    if len(other_user_rate_list) == 0:  #no item in neighbor
         #print "No enough information to predict item:%d for user %d."%(itemid,userid)
         #print "return user's baseline rate for the item."
         return userbaseline
@@ -19,7 +19,10 @@ def predict_by_knn(dao,userid,itemid):
         sum2 = 0.
         for u,s,r in other_user_rate_list:
             sum1 += s * (r - get_Baseline(dao,u))
-            sum2 += s
+            sum2 += s 
+        if sum2 == 0:
+            #print("No neighbot avilable for " + str(userid))
+            return userbaseline    #return baseline 
         predict_rate = userbaseline + sum1 / sum2
         return predict_rate
 

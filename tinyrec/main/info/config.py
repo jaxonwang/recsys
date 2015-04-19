@@ -42,7 +42,8 @@ class Config(object):
                     'datafile_seperator':'py_type',
                     'datafile_pattern':'py_type'},
             'user-based_CF':{\
-                    'similarity':['pearson','cos'],
+                    'similarity':['pearson','cos','pearson_intersect','pearson_default'],
+                    'significance_weight':'int',
                     'neighborsize_k':'int',
                     'neighbormodel' :['knn'],
                     'baseline_predictor':['mean','BP1','BP2','BP3']}

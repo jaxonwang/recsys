@@ -49,6 +49,22 @@ def cross_validate(k_fo):
 
 if __name__ == "__main__":
     cross_validate(6)
+    #print one_userbased_CF_validate()
+    '''
+    config.Config().configdict['user-based_CF']['similarity'] = 'pearson'
+
+    config.Config().configdict['user-based_CF']['significance_weight'] = 100
+    config.Config().apply_changes()
+    print one_userbased_CF_validate()
+    '''
+    #print similarity.get_k_nearest_users(688,similarity.new_DAO_interface())
+    '''
+    dao = similarity.new_DAO_interface()
+    a=dao.get_item_list_by_user(688)
+    b=dao.get_item_list_by_user(598)
+    print similarity.similarity_func(a,b,1682)
+    '''
+
 
 
 
