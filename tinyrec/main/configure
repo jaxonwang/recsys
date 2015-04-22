@@ -4,9 +4,9 @@ storage = redis 	;redis, or others. The place where data are stored during proce
 multithread = auto 	;multi-thread optimization. auto config or manually assign a number of concurrency task
 
 [user-based_CF] 	;collaboratiive filter config
-similarity = pearson_intersect 	;pearson for pearson correlation. cos for cosine
-significance_weight = 25 ;threshold for the significance weighting 0 for none
-neighborsize_K = 130
+similarity = pearson 	;pearson for pearson correlation. cos for cosine
+significance_weight = 0 ;threshold for the significance weighting 0 for none
+neighborsize_K = 140
 neighbormodel = knn 	;{knn, others}
 baseline_predictor = mean ;{mean,BP1,BP2.BP3} to decrease factors other than relations
 
@@ -20,13 +20,13 @@ db = 0
 ;password = password
 
 [dataset]
-datafile_path = /home/wjx/recsys/ml-1m/ratings.dat
-testfile_path = /tmp/haha/test_0.dat
-testfile_dir = /tmp/haha
-datafile_seperator = "::"
+datafile_path = /home/wjx/recsys/data/train_0.dat ;/tmp/haha/train_0.dat ;/home/wjx/recsys/ml-1m/ratings.dat ;
+testfile_path = /home/wjx/recsys/data/test_0.dat
+testfile_dir = /home/wjx/recsys/data
+datafile_seperator = "\t"
 datafile_pattern = ['user','movie','rate','time']
-maxuserid = 6040	;avilable only when id is continous,id can equal to this
-maxitemid = 3952 	;avilable only when id is continous,data need to be pre processed first.
+maxuserid = 943 ;6040	;avilable only when id is continous,id can equal to this
+maxitemid = 1682 ;3952 	;avilable only when id is continous,data need to be pre processed first.
 startfromzero = False 	;id start from zero if Ture else start from one
 
 

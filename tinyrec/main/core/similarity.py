@@ -15,7 +15,7 @@ def to_sparse_vector(vec, vector_len):
     return vector.SparseVector(index_list, data_list, vector_len)
 
 #receive two list as vector
-def my_sparse_vector_pearsonr_similarity(vectora,vectorb,vec_len):
+def my_sparse_vector_similarity(vectora,vectorb,vec_len):
 
     vectora.sort()
     vectorb.sort()
@@ -50,17 +50,17 @@ def set_config():
         from main.DAO import redisDAO
         DAOtype = redisDAO.redisDAO
 
+    similarity_func = my_sparse_vector_similarity
     #get the similarity method
     if similaritytype == 'pearson':
         #similarity func must receivce two lists representing vector as [(index,value),...] and a vector length
-        similarity_func = my_sparse_vector_pearsonr_similarity
         pearsonr = vector.pearsonr
     elif similaritytype == 'pearson_intersect':
-        similarity_func = my_sparse_vector_pearsonr_similarity
         pearsonr = vector.pearsonr_hasvalue_both
     elif similaritytype == 'pearson_default':
-        similarity_func = my_sparse_vector_pearsonr_similarity
         pearsonr = vector.pearsonr_default_rate
+    elif similaritytype == 'cos':
+        pearsonr = vector.cosine
     else :
         print "You should never goes into here! Baddly configed."
 

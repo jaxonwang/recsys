@@ -48,16 +48,26 @@ def cross_validate(k_fo):
     print sum(rmse_list)/len(rmse_list)
 
 if __name__ == "__main__":
-    cross_validate(6)
+    #cross_validate(6)
     #print one_userbased_CF_validate()
     '''
     config.Config().configdict['user-based_CF']['similarity'] = 'pearson'
 
-    config.Config().configdict['user-based_CF']['significance_weight'] = 100
+    '''
+    '''
+    for i in range (1,250,5):
+        config.Config().configdict['user-based_CF']['significance_weight'] = i
+        config.Config().apply_changes()
+        print one_userbased_CF_validate(),i
+    #print similarity.get_k_nearest_users(688,similarity.new_DAO_interface())
+    '''
+    config.Config().configdict['user-based_CF']['similarity'] = 'pearson' 
     config.Config().apply_changes()
     print one_userbased_CF_validate()
-    '''
-    #print similarity.get_k_nearest_users(688,similarity.new_DAO_interface())
+
+    config.Config().configdict['user-based_CF']['similarity'] = 'cos' 
+    config.Config().apply_changes()
+    print one_userbased_CF_validate()
     '''
     dao = similarity.new_DAO_interface()
     a=dao.get_item_list_by_user(688)

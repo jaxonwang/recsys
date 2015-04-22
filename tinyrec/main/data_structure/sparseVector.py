@@ -21,6 +21,29 @@ class SparseVector:
             s.append("%d:%.1f\n" % (i,v))
         return "".join(s)
 
+def cosine(sparsevector_a,sparsevector_b,startfromone = False):
+    if sparsevector_a.vector_length != sparsevector_b.vector_length:
+        raise ValueError("Different vector length.")
+
+    sv_a_m = math.sqrt(sum([v * v for (x,v) in sparsevector_a.vector_list]))
+    sv_b_m = math.sqrt(sum([v * v for (x,v) in sparsevector_b.vector_list]))
+    dot_product = 0.
+    i,j = 0,0
+    while i < len(sparsevector_a.vector_list) and j < len(sparsevector_b.vector_list):
+        index_x, value_x = sparsevector_a.vector_list[i]
+        index_y, value_y = sparsevector_b.vector_list[j]
+
+        if index_x > index_y:
+            j += 1
+        elif index_x < index_y:
+            i += 1
+        else:
+            dot_product += value_x * value_y
+            i += 1
+            j += 1
+
+    return dot_product / (sv_a_m * sv_b_m)
+
 def pearsonr(sparsevector_a, sparsevector_b, startfromone = False):
     if sparsevector_a.vector_length != sparsevector_b.vector_length:
         raise ValueError("Different vector length.")
