@@ -10,3 +10,6 @@ ml*/
 #complie file
 *.o
 *.s
+
+#temp file
+*~

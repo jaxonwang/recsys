@@ -21,3 +21,5 @@ func(b,c)
 print "user",a
 print "user",b
 print "sim",dao.get_user_sim_list(44,50)
+
+print dao.get_sim_between_two_items(111,1221)

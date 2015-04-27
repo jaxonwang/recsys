@@ -5,7 +5,7 @@ multithread = auto 	;multi-thread optimization. auto config or manually assign a
 
 [user-based_CF] 	;collaboratiive filter config
 similarity = pearson 	;pearson for pearson correlation. cos for cosine
-significance_weight = 0 ;threshold for the significance weighting 0 for none
+significance_weight = 80 ;threshold for the significance weighting 0 for none
 neighborsize_K = 140
 neighbormodel = knn 	;{knn, others}
 baseline_predictor = mean ;{mean,BP1,BP2.BP3} to decrease factors other than relations
@@ -20,8 +20,8 @@ db = 0
 ;password = password
 
 [dataset]
-datafile_path = /home/wjx/recsys/data/train_0.dat ;/tmp/haha/train_0.dat ;/home/wjx/recsys/ml-1m/ratings.dat ;
-testfile_path = /home/wjx/recsys/data/test_0.dat
+datafile_path = /home/wjx/recsys/data/train_1.dat ;/tmp/haha/train_0.dat ;/home/wjx/recsys/ml-1m/ratings.dat ;
+testfile_path = /home/wjx/recsys/data/test_1.dat
 testfile_dir = /home/wjx/recsys/data
 datafile_seperator = "\t"
 datafile_pattern = ['user','movie','rate','time']

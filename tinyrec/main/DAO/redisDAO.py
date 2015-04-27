@@ -24,7 +24,7 @@ class redisDAO():
         rawdict = self.conn.hgetall("u" + str(userid))
         return [(int(i), float(r)) for (i,r) in rawdict.items()]
 
-    def get_user_lsit_by_item(self,itemid):
+    def get_user_list_by_item(self,itemid):
 
         rawdict = self.conn.hgetall("i" + str(itemid))
         return [(int(u), float(r)) for (u,r) in rawdict.items()]
@@ -59,6 +59,12 @@ class redisDAO():
                 desc = bydesc, withscores = True)
         l =[(int(i), sim) for (i, sim) in l]
         return l
+
+    def get_sim_between_two_items(self,itemaid,itembid):
+        sim = self.conn.zscore("i_sim_" + str(itemaid), itembid)
+        if sim:
+            return float(sim)
+        return 0
 
     def del_user_sim(self,userid):
         return self.conn.delete("u_sim_" + str(userid))

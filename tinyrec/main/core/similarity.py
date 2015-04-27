@@ -17,25 +17,22 @@ def to_sparse_vector(vec, vector_len):
 #receive two list as vector
 def my_sparse_vector_similarity(vectora,vectorb,vec_len):
 
-    vectora.sort()
-    vectorb.sort()
-
     sparseveca = to_sparse_vector(vectora,vec_len)
     sparsevecb = to_sparse_vector(vectorb,vec_len)
 
     startfromone = not startfromzero
-    pearson = abs(pearsonr(sparseveca,sparsevecb,startfromone))
+    sim = abs(vec_sim(sparseveca,sparsevecb,startfromone))
     if significance_weight:
         i = len(set([i for i,v in vectora]) & set([i for i,v in vectorb]))
         if i < significance_weight:
-            pearson *= float(i) / float(significance_weight)
-    return pearson
+            sim *= float(i) / float(significance_weight)
+    return sim 
 
 def set_config():
 
     global storetype, similaritytype, maxitemid  
     global maxuserid, startfromzero, multithread 
-    global DAOtype, similarity_func, pearsonr, significance_weight
+    global DAOtype, similarity_func, vec_sim, significance_weight
 
     storetype = config.Config().configdict['global']['storage']
     similaritytype = config.Config().configdict['user-based_CF']['similarity']
@@ -54,13 +51,15 @@ def set_config():
     #get the similarity method
     if similaritytype == 'pearson':
         #similarity func must receivce two lists representing vector as [(index,value),...] and a vector length
-        pearsonr = vector.pearsonr
+        vec_sim = vector.pearsonr
     elif similaritytype == 'pearson_intersect':
-        pearsonr = vector.pearsonr_hasvalue_both
+        vec_sim = vector.pearsonr_hasvalue_both
     elif similaritytype == 'pearson_default':
-        pearsonr = vector.pearsonr_default_rate
+        vec_sim = vector.pearsonr_default_rate
     elif similaritytype == 'cos':
-        pearsonr = vector.cosine
+        vec_sim = vector.cosine
+    elif similaritytype == 'spearman':
+        vec_sim = vector.spearman
     else :
         print "You should never goes into here! Baddly configed."
 
@@ -130,6 +129,76 @@ def clean_all_user_sim():
     start = 0 if startfromzero else 1 #whether id start from zero
     for userid in range(start,maxuserid + 1):
         dao.del_user_sim(userid)
+    print "All cleared."
+
+
+def all_item_similarity():
+    '''
+    calculate all python similarity and put to the datasore through DAO
+    '''
+
+    print "Calculating similarity for each item."
+    t1 = time.time()
+
+    devide_number = multithread
+    start = 0 if startfromzero else 1 #whether id start from zero
+    total = maxuserid + 1 - start
+    proclist = []
+    for i in range(0,devide_number):
+        end = start + total / 8
+        if end > maxitemid or i == devide_number - 1:
+            end = maxuserid + 1
+
+        p = Process(target = item_similarity_in_range,args = (start,end))
+        proclist.append(p)
+        p.start()
+        start = end
+
+    for p in proclist:
+        p.join()
+
+    t2 = time.time()
+    print "All item similarities have been claculated in %ds"%(t2 - t1)
+
+def item_similarity_in_range(start,end):
+    dao = new_DAO_interface()
+
+    for itemid in range(start,end):
+        simlist = get_other_item_sim(itemid, dao)
+        for otheritemid,sim in simlist:
+            dao.put_item_sim(itemid,otheritemid,sim)
+        #print "User:" + str(userid) + " neighborhood similarity calculated."
+        
+def get_other_item_sim(itemid, dao):
+    '''
+    return the similarity between specified item and all other items
+    '''
+    nearestlist = []
+    start = 0 if startfromzero else 1 #whether id start from zero
+    item = dao.get_user_list_by_item(itemid)
+    if item == []:
+        print "No record for %d when calculating item similarity." % (itemid)
+        return [] #return a empty list if there are no record for item
+    
+    for i in range(start,maxitemid + 1):
+        if i == itemid:
+            continue
+        item_i = dao.get_user_list_by_item(i)
+        if item_i == []:
+            continue    #continue if there are no record for i
+        sim = similarity_func(item,item_i,maxuserid + 1)
+        if sim > 0:
+            nearestlist.append((i,sim))
+    nearestlist.sort(key = lambda nearestlist:nearestlist[1], reverse = True)
+    return nearestlist
+
+def clean_all_item_sim():
+    print "Clearning previous calculated similarity."
+    dao = new_DAO_interface()
+
+    start = 0 if startfromzero else 1 #whether id start from zero
+    for itemid in range(start,maxitemid + 1):
+        dao.del_item_sim(itemid)
     print "All cleared."
 
 

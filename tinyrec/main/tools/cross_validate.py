@@ -68,6 +68,10 @@ if __name__ == "__main__":
     config.Config().configdict['user-based_CF']['similarity'] = 'cos' 
     config.Config().apply_changes()
     print one_userbased_CF_validate()
+
+    config.Config().configdict['user-based_CF']['similarity'] = 'spearman' 
+    config.Config().apply_changes()
+    print one_userbased_CF_validate()
     '''
     dao = similarity.new_DAO_interface()
     a=dao.get_item_list_by_user(688)

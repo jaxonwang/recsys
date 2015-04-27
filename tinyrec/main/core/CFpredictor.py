@@ -1,7 +1,7 @@
 
 from main.info import config
 
-def predict_by_knn(dao,userid,itemid):
+def user_based_predict_by_knn(dao,userid,itemid):
     sim_list = get_user_topk_neighbor(dao,userid)
     other_user_rate_list = []
     userbaseline = get_Baseline(dao,userid)
@@ -40,6 +40,27 @@ def new_DAO_interface():
 def get_user_topk_neighbor(dao,userid):
     return dao.get_user_sim_list(userid,neiborsize)
 
+def item_based_predict_by_knn(dao,userid,itemid):
+    sim_list = []
+
+    item_list = dao.get_item_list_by_user(userid)
+    for i,r in item_list:
+        sim_i = dao.get_sim_between_two_items(itemid,i)
+        if sim_i > 0: #only append items with similarity above zero.
+            sim_list.append((i,sim_i))
+
+    if len(sim_list) == 0: #return baseline if no item available
+        return get_Baseline(dao,userid)
+
+    sum1 = 0.
+    sum2 = 0.
+    for i,s in sim_list:
+        sum1 += i * s 
+        sum2 += i
+
+    predict_rate = sum1 / sum2
+    return predict_rate
+
 def get_config():
     global CF_config, neiborsize, neibormodel, BP, storetype
     global predict_item_score, get_Baseline, DAOtype
@@ -52,7 +73,7 @@ def get_config():
 
     #choose function
     if neibormodel == 'knn':
-        predict_item_score = predict_by_knn;
+        predict_item_score = user_based_predict_by_knn;
 
     if BP == 'mean':
         get_Baseline = get_user_rating_mean
@@ -67,4 +88,4 @@ config.Config().register_function(get_config)
 if __name__ == "__main__":
     dao = new_DAO_interface()
     for i in range(1,135):
-        predict_by_knn(dao,44,i)
+        user_based_predict_by_knn(dao,44,i)
