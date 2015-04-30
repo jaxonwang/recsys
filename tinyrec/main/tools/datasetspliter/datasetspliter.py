@@ -91,6 +91,6 @@ if __name__ == "__main__":
     pprint.pprint(count)
     '''
     #functin test
-    split('/home/wjx/recsys/data/ml-100k/u.data','/home/wjx/recsys/data/',7)    
+    split('/home/wjx/recsys/data/ml-100k/u.data','/home/wjx/recsys/data/',10)    
 
 

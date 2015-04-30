@@ -41,7 +41,8 @@ class Config(object):
                     'testfile_dir'  :'str',
                     'datafile_seperator':'py_type',
                     'datafile_pattern':'py_type'},
-            'user-based_CF':{\
+            'user_item_CF':{\
+                    'model':['user-based','item-based'],
                     'similarity':['pearson','cos','pearson_intersect','pearson_default','spearman'],
                     'significance_weight':'int',
                     'neighborsize_k':'int',

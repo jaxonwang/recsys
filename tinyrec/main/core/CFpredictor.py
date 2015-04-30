@@ -1,4 +1,4 @@
-
+import math
 from main.info import config
 
 def user_based_predict_by_knn(dao,userid,itemid):
@@ -40,6 +40,15 @@ def new_DAO_interface():
 def get_user_topk_neighbor(dao,userid):
     return dao.get_user_sim_list(userid,neiborsize)
 
+def sim_adjust(x):
+    th = 0.05
+    a = 3
+    if x > th:
+        p = math.pow(x/th,a)*th
+    else:
+        p = x
+    return p 
+
 def item_based_predict_by_knn(dao,userid,itemid):
     sim_list = []
 
@@ -47,33 +56,40 @@ def item_based_predict_by_knn(dao,userid,itemid):
     for i,r in item_list:
         sim_i = dao.get_sim_between_two_items(itemid,i)
         if sim_i > 0: #only append items with similarity above zero.
-            sim_list.append((i,sim_i))
+            sim_list.append((sim_i,r))
+    sim_list.sort(reverse = True)
 
     if len(sim_list) == 0: #return baseline if no item available
         return get_Baseline(dao,userid)
 
     sum1 = 0.
     sum2 = 0.
-    for i,s in sim_list:
-        sum1 += i * s 
-        sum2 += i
+    for s,r in sim_list:
+        sum1 += r * s 
+        sum2 += s
 
     predict_rate = sum1 / sum2
     return predict_rate
 
 def get_config():
     global CF_config, neiborsize, neibormodel, BP, storetype
-    global predict_item_score, get_Baseline, DAOtype
+    global predict_item_score, get_Baseline, DAOtype, pmodel
 
-    CF_config = config.Config().configdict['user-based_CF']
+    CF_config = config.Config().configdict['user_item_CF']
     neiborsize = CF_config['neighborsize_k']
     neibormodel = CF_config['neighbormodel']
     BP = CF_config['baseline_predictor']
+    pmodel = CF_config['model']
     storetype = config.Config().configdict['global']['storage']
 
     #choose function
     if neibormodel == 'knn':
-        predict_item_score = user_based_predict_by_knn;
+        if pmodel == 'user-based':
+            predict_item_score = user_based_predict_by_knn;
+        elif pmodel == 'item-based':
+            predict_item_score = item_based_predict_by_knn;
+        else:
+            print "You should never get here wrong config for model."
 
     if BP == 'mean':
         get_Baseline = get_user_rating_mean

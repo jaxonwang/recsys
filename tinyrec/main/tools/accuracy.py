@@ -7,9 +7,10 @@ import main.info.config as config
 import main.tools.datasetreader.datafilereader as datafilereader
 
 
-def RMSE_single_process():
+def RMSE_MAE_single_process():
     count = 0
     biassquare = 0.
+    totalbias = 0.
     it = datafilereader.Reader(testfilepath,seperater,pattern_list).get_iterator()
     
     dao = CFpredictor.new_DAO_interface()
@@ -22,13 +23,13 @@ def RMSE_single_process():
         rate = float(record['rate'])
         predict_rate = CFpredictor.predict_item_score(dao,userid,itemid)
         bias = predict_rate - rate
-#		print predict_rate,rate
+        totalbias += abs(bias)
         biassquare += bias * bias
         count += 1
 
-    return math.sqrt(biassquare / count)
+    return math.sqrt(biassquare / count), totalbias / count
 
-def RMSE_multi_process():
+def RMSE_MAE_multi_process():
 
     it = datafilereader.Reader(testfilepath,seperater,pattern_list).get_iterator()
     record_list = []
@@ -39,13 +40,14 @@ def RMSE_multi_process():
         record_list.append(record)
     it = None
 
-    def RMSE_multi_subprocess(record_list, start, end, pipe):
+    def RMSE_MAE_multi_subprocess(record_list, start, end, pipe):
         '''
         sub process using shared memery and return bay pipe
         '''
         dao = CFpredictor.new_DAO_interface()
 
         biassquare = 0.
+        total_bias = 0.
         for i in range(start,end):
             record = record_list[i]
             userid = int(record['user'])
@@ -53,9 +55,9 @@ def RMSE_multi_process():
             rate = float(record['rate'])
             predict_rate = CFpredictor.predict_item_score(dao,userid,itemid)
             bias = predict_rate - rate
-    #		print predict_rate,rate
             biassquare += bias * bias
-        pipe.send(biassquare)
+            total_bias += abs(bias)
+        pipe.send((biassquare,total_bias))
 
     (p_recv,p_send) = multiprocessing.Pipe(False)
     subprocesses = []
@@ -67,47 +69,52 @@ def RMSE_multi_process():
             end = len(record_list)
         else:
             end = start + step
-        subproc = multiprocessing.Process(target = RMSE_multi_subprocess,\
+        subproc = multiprocessing.Process(target =\
+                RMSE_MAE_multi_subprocess,\
                 args = (record_list, start, end, p_send))
         subprocesses.append(subproc)
         subproc.start()
         start += step
 
-    total_bias = 0.
+    total_bias_rmse = 0.
+    total_bias_mae = 0.
     for i in range(multithread):
         tmp = p_recv.recv()
-        total_bias += tmp
+        total_bias_rmse += tmp[0]
+        total_bias_mae += tmp[1]
         subprocesses[i].join()
     
-    return math.sqrt(total_bias / len(record_list))
+    rmse = math.sqrt(total_bias_rmse / len(record_list))
+    mae = total_bias_mae / len(record_list)
+    return rmse,mae
 
 def get_config():
     global seperater, pattern_list, testfilepath
-    global multithread, RMSE_func
+    global multithread, RMSE_MAE_func
     seperater = config.Config().configdict['dataset']['datafile_seperator']
     pattern_list = config.Config().configdict['dataset']['datafile_pattern']
     testfilepath = config.Config().configdict['dataset']['testfile_path']
     multithread = config.Config().configdict['global']['multithread']
 
     if multithread == 1:
-        RMSE_func = RMSE_single_process
+        RMSE_MAE_func = RMSE_MAE_single_process
     else:
-        RMSE_func = RMSE_multi_process
+        RMSE_MAE_func = RMSE_MAE_multi_process
 
 get_config()
 config.Config().register_function(get_config)
 
-def RMSE():
+def RMSE_MAE():
     print "Using file:%s to calculate RMSE."%(testfilepath)
     t1 = time.time()
-    r = RMSE_func()
+    r = RMSE_MAE_func()
     t2 = time.time()
     print "RMSE calculated in %fs."%(t2 - t1)
     return r
 
 def different_k():
     for i in range(140,65,-5):
-        config.Config().configdict['user-based_CF']['neighborsize_k'] = i
+        config.Config().configdict['user_item_CF']['neighborsize_k'] = i
         config.Config().apply_changes()
 	print RMSE(),i
 

@@ -28,44 +28,6 @@ def my_sparse_vector_similarity(vectora,vectorb,vec_len):
             sim *= float(i) / float(significance_weight)
     return sim 
 
-def set_config():
-
-    global storetype, similaritytype, maxitemid  
-    global maxuserid, startfromzero, multithread 
-    global DAOtype, similarity_func, vec_sim, significance_weight
-
-    storetype = config.Config().configdict['global']['storage']
-    similaritytype = config.Config().configdict['user-based_CF']['similarity']
-    significance_weight= config.Config().configdict['user-based_CF']['significance_weight']
-    maxitemid = config.Config().configdict['dataset']['maxitemid'] 
-    maxuserid = config.Config().configdict['dataset']['maxuserid'] 
-    startfromzero = config.Config().configdict['dataset']['startfromzero'] 
-    multithread = config.Config().configdict['global']['multithread'] 
-
-    #get the DAO interface
-    if storetype == 'redis':
-        from main.DAO import redisDAO
-        DAOtype = redisDAO.redisDAO
-
-    similarity_func = my_sparse_vector_similarity
-    #get the similarity method
-    if similaritytype == 'pearson':
-        #similarity func must receivce two lists representing vector as [(index,value),...] and a vector length
-        vec_sim = vector.pearsonr
-    elif similaritytype == 'pearson_intersect':
-        vec_sim = vector.pearsonr_hasvalue_both
-    elif similaritytype == 'pearson_default':
-        vec_sim = vector.pearsonr_default_rate
-    elif similaritytype == 'cos':
-        vec_sim = vector.cosine
-    elif similaritytype == 'spearman':
-        vec_sim = vector.spearman
-    else :
-        print "You should never goes into here! Baddly configed."
-
-set_config()
-config.Config().register_function(set_config)
-
 def get_k_nearest_users(userid, dao, k = 200):
     '''
 return a the k nearest users list in reverse order for a given userid 
@@ -142,12 +104,12 @@ def all_item_similarity():
 
     devide_number = multithread
     start = 0 if startfromzero else 1 #whether id start from zero
-    total = maxuserid + 1 - start
+    total = maxitemid + 1 - start
     proclist = []
     for i in range(0,devide_number):
         end = start + total / 8
         if end > maxitemid or i == devide_number - 1:
-            end = maxuserid + 1
+            end = maxitemid + 1
 
         p = Process(target = item_similarity_in_range,args = (start,end))
         proclist.append(p)
@@ -187,7 +149,7 @@ def get_other_item_sim(itemid, dao):
         if item_i == []:
             continue    #continue if there are no record for i
         sim = similarity_func(item,item_i,maxuserid + 1)
-        if sim > 0:
+        if sim != 0.:
             nearestlist.append((i,sim))
     nearestlist.sort(key = lambda nearestlist:nearestlist[1], reverse = True)
     return nearestlist
@@ -204,6 +166,52 @@ def clean_all_item_sim():
 
 def new_DAO_interface():
     return DAOtype()
+
+def set_config():
+
+    global storetype, similaritytype, maxitemid  
+    global maxuserid, startfromzero, multithread 
+    global DAOtype, similarity_func, vec_sim, significance_weight, pmodel, all_simlarity
+
+    storetype = config.Config().configdict['global']['storage']
+    similaritytype = config.Config().configdict['user_item_CF']['similarity']
+    significance_weight= config.Config().configdict['user_item_CF']['significance_weight']
+    maxitemid = config.Config().configdict['dataset']['maxitemid'] 
+    maxuserid = config.Config().configdict['dataset']['maxuserid'] 
+    startfromzero = config.Config().configdict['dataset']['startfromzero'] 
+    multithread = config.Config().configdict['global']['multithread'] 
+    pmodel = config.Config().configdict['user_item_CF']['model']
+    #item-based or user-based
+    if pmodel == "user-based":
+        all_simlarity = all_user_similarity
+    elif pmodel == "item-based":
+        all_simlarity = all_item_similarity
+    else:
+        raise Exception("You should never get here, badly configed.")
+
+    #get the DAO interface
+    if storetype == 'redis':
+        from main.DAO import redisDAO
+        DAOtype = redisDAO.redisDAO
+
+    similarity_func = my_sparse_vector_similarity
+    #get the similarity method
+    if similaritytype == 'pearson':
+        #similarity func must receivce two lists representing vector as [(index,value),...] and a vector length
+        vec_sim = vector.pearsonr
+    elif similaritytype == 'pearson_intersect':
+        vec_sim = vector.pearsonr_hasvalue_both
+    elif similaritytype == 'pearson_default':
+        vec_sim = vector.pearsonr_default_rate
+    elif similaritytype == 'cos':
+        vec_sim = vector.cosine
+    elif similaritytype == 'spearman':
+        vec_sim = vector.spearman
+    else :
+        print "You should never goes into here! Baddly configed."
+
+set_config()
+config.Config().register_function(set_config)
 
 if __name__ == "__main__":
     clean_all_user_sim()

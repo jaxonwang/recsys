@@ -3,7 +3,8 @@
 storage = redis 	;redis, or others. The place where data are stored during processing.
 multithread = auto 	;multi-thread optimization. auto config or manually assign a number of concurrency task
 
-[user-based_CF] 	;collaboratiive filter config
+[user_item_CF] 	;collaboratiive filter config
+model = user-based
 similarity = pearson 	;pearson for pearson correlation. cos for cosine
 significance_weight = 80 ;threshold for the significance weighting 0 for none
 neighborsize_K = 140
