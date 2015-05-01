@@ -1,5 +1,6 @@
 import main.core.similarity as similarity
 import main.core.CFpredictor as CFpredictor
+import main.core.preprocess as preprocess
 import main.tools.datasetreader.datatoredis as  datatoredis
 import main.tools.accuracy as accuracy
 import main.tools.datasetspliter.datasetspliter as datasetspliter
@@ -13,6 +14,9 @@ def one_userbased_CF_validate():
 
     #read in file 
     datatoredis.to_redis()
+
+    #preproces
+    preprocess.preprocess()
 
     #similarity, user/item determinded by config
     similarity.all_simlarity() 
@@ -62,16 +66,22 @@ if __name__ == "__main__":
         config.Config().apply_changes()
         print one_userbased_CF_validate(),i
     #print similarity.get_k_nearest_users(688,similarity.new_DAO_interface())
-    '''
     config.Config().configdict['user_item_CF']['similarity'] = 'pearson' 
     config.Config().apply_changes()
     print one_userbased_CF_validate()
+    '''
 
+    config.Config().configdict['user_item_CF']['model'] = 'item-based' 
+    config.Config().configdict['user_item_CF']['similarity'] = 'adjusted_cos' 
+    config.Config().apply_changes()
+    print one_userbased_CF_validate()
+
+    '''
     config.Config().configdict['user_item_CF']['model'] = 'item-based' 
     config.Config().configdict['user_item_CF']['similarity'] = 'cos' 
     config.Config().apply_changes()
     print one_userbased_CF_validate()
-    '''
+
     config.Config().configdict['user_item_CF']['similarity'] = 'cos' 
     config.Config().apply_changes()
     print one_userbased_CF_validate()

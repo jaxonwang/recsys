@@ -1,5 +1,5 @@
 
-import redisDAO
+from main.DAO import redisDAO
 
 def func(a,c):
     for i,v in a:
@@ -23,3 +23,7 @@ print "user",b
 print "sim",dao.get_user_sim_list(44,50)
 
 print dao.get_sim_between_two_items(111,1221)
+
+print dao.get_user_rating_mean(55)
+print dao.put_user_rating_mean(55,3.25)
+print dao.get_user_rating_mean(55)

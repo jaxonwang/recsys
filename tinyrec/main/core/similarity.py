@@ -5,7 +5,13 @@ from main.info import config
 #from main.data_structure import vector as vector1
 from main.data_structure import sparseVector as vector
 
-
+user_mean_matrix = {}
+def init_user_mean_matrix(dao):
+    maxuserid = config.Config().configdict['dataset']['maxuserid']
+    for i in range(1,maxuserid + 1):
+        m = dao.get_user_rating_mean(i)
+        user_mean_matrix[str(i)] = m
+    
 def to_sparse_vector(vec, vector_len):
     index_list = [i for (i,v) in vec]
     data_list = [v for (i,v) in vec]
@@ -26,6 +32,22 @@ def my_sparse_vector_similarity(vectora,vectorb,vec_len):
         i = len(set([i for i,v in vectora]) & set([i for i,v in vectorb]))
         if i < significance_weight:
             sim *= float(i) / float(significance_weight)
+    return sim 
+
+def item_based_centralized_vector_similarity(vectora,vectorb,vec_len):
+    def centralie_vector(v):
+        for i in range(len(v)):
+            user_mean = user_mean_matrix[str(v[i][0])]
+            v[i] = (v[i][0],v[i][1] - user_mean)
+
+    centralie_vector(vectora)
+    centralie_vector(vectorb)
+    print vectorb
+    sparseveca = to_sparse_vector(vectora,vec_len)
+    sparsevecb = to_sparse_vector(vectorb,vec_len)
+
+    startfromone = not startfromzero
+    sim = abs(vec_sim(sparseveca,sparsevecb,startfromone))
     return sim 
 
 def get_k_nearest_users(userid, dao, k = 200):
@@ -53,6 +75,7 @@ def all_user_similarity():
 
     print "Calculating similarity for each user."
     t1 = time.time()
+    init_user_mean_matrix(new_DAO_interface())
 
     devide_number = multithread
     start = 0 if startfromzero else 1 #whether id start from zero
@@ -102,6 +125,7 @@ def all_item_similarity():
     print "Calculating similarity for each item."
     t1 = time.time()
 
+    init_user_mean_matrix(new_DAO_interface())
     devide_number = multithread
     start = 0 if startfromzero else 1 #whether id start from zero
     total = maxitemid + 1 - start
@@ -207,8 +231,11 @@ def set_config():
         vec_sim = vector.cosine
     elif similaritytype == 'spearman':
         vec_sim = vector.spearman
+    elif similaritytype == 'adjusted_cos':
+        vec_sim = vector.cosine
+        similarity_func = item_based_centralized_vector_similarity
     else :
-        print "You should never goes into here! Baddly configed."
+        raise Exception("You should never goes into here! Baddly configed.")
 
 set_config()
 config.Config().register_function(set_config)

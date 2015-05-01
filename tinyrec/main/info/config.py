@@ -43,7 +43,8 @@ class Config(object):
                     'datafile_pattern':'py_type'},
             'user_item_CF':{\
                     'model':['user-based','item-based'],
-                    'similarity':['pearson','cos','pearson_intersect','pearson_default','spearman'],
+                    'similarity':['pearson','cos','pearson_intersect',
+                        'pearson_default','spearman','adjusted_cos'],
                     'significance_weight':'int',
                     'neighborsize_k':'int',
                     'neighbormodel' :['knn'],
@@ -114,6 +115,14 @@ class Config(object):
             out = os.popen(get_cpu_num_cmd).readlines()[0]
             self.configdict['global']['multithread'] = out
         self.__to_type('global','multithread','int')
+
+    def get_dao_instance(self):
+        daotype = self.configdict['global']['storage']
+        if daotype == 'redis':
+            from main.DAO import redisDAO
+            return redisDAO.redisDAO()
+        else:
+            raise Exception("you should never get here! badly configed.")
 
     def print_all(self):
         for j in self.configdict:

@@ -20,12 +20,18 @@ class redisDAO():
     def __init__(self,ip = cfgip,port = cfgport,db=cfgdb):
         self.conn = redis.Redis(ip,port,db)
 
+    def put_rate(self,userid,itemid,rating):
+        return self.conn.hset("u" + str(userid),itemid,rating)
+
     def get_item_list_by_user(self,userid):
         rawdict = self.conn.hgetall("u" + str(userid))
-        return [(int(i), float(r)) for (i,r) in rawdict.items()]
+        retlist = []
+        for (i,r) in rawdict.items():
+            if i[0] >= '0' and i[0] <= '9': #only append item and ratings
+                retlist.append((int(i),float(r)))
+        return retlist
 
     def get_user_list_by_item(self,itemid):
-
         rawdict = self.conn.hgetall("i" + str(itemid))
         return [(int(u), float(r)) for (u,r) in rawdict.items()]
 
@@ -66,6 +72,16 @@ class redisDAO():
             return float(sim)
         return 0
 
+    def put_user_rating_mean(self,userid,meanvalue):
+        return self.conn.hset("u" + str(userid),"mean",meanvalue)
+    
+    def get_user_rating_mean(self,userid):
+        mean = self.conn.hget("u" + str(userid), "mean")
+        if mean:
+            return float(mean)
+        else:
+            return 0.
+
     def del_user_sim(self,userid):
         return self.conn.delete("u_sim_" + str(userid))
 
@@ -74,6 +90,7 @@ class redisDAO():
 
     def del_all_keys(self):
         return self.conn.flushdb()
+
 
 
 def pearsion_correlation(x,y):
