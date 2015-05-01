@@ -233,7 +233,6 @@ def set_config():
         vec_sim = vector.spearman
     elif similaritytype == 'adjusted_cos':
         vec_sim = vector.cosine
-        similarity_func = item_based_centralized_vector_similarity
     else :
         raise Exception("You should never goes into here! Baddly configed.")
 

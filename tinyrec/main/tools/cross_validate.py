@@ -22,6 +22,7 @@ def one_userbased_CF_validate():
     similarity.all_simlarity() 
 
     #RMSE
+    datatoredis.to_redis()
     rmse = accuracy.RMSE_MAE()
 
     return rmse
