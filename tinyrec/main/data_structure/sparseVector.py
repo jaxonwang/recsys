@@ -138,17 +138,6 @@ def cosine(sparsevector_a,sparsevector_b,startfromone = False):
 
     return dot_product / (sv_a_m * sv_b_m)
 
-def adjusted_cosine(sparsevector_a,sparsevector_b,startfromone = False):
-
-    def adjust_vector(sparsevector):
-        l = sparsevector.vector_list
-        for i in range(len(l)):
-            u_mean = dao.get_user_rating_mean(l[i][0])
-            l[i] = (l[i][0],l[i][1] - u_mean)
-
-    adjust_vector(sparsevector_a)
-    adjust_vector(sparsevector_b)
-    return cosine(sparsevector_a,sparsevector_b,startfromone)
 
 def pearsonr(sparsevector_a, sparsevector_b, startfromone = False):
     if sparsevector_a.vector_length != sparsevector_b.vector_length:

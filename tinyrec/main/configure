@@ -6,7 +6,7 @@ multithread = auto 	;multi-thread optimization. auto config or manually assign a
 [user_item_CF] 	;collaboratiive filter config
 model = user-based
 similarity = pearson 	;pearson for pearson correlation. cos for cosine
-significance_weight = 80 ;threshold for the significance weighting 0 for none
+significance_weight = 0 ;threshold for the significance weighting 0 for none
 neighborsize_K = 140
 neighbormodel = knn 	;{knn, others}
 baseline_predictor = mean ;{mean,BP1,BP2.BP3} to decrease factors other than relations

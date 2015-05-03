@@ -42,12 +42,15 @@ def item_based_centralized_vector_similarity(vectora,vectorb,vec_len):
 
     centralie_vector(vectora)
     centralie_vector(vectorb)
-    print vectorb
     sparseveca = to_sparse_vector(vectora,vec_len)
     sparsevecb = to_sparse_vector(vectorb,vec_len)
 
     startfromone = not startfromzero
     sim = abs(vec_sim(sparseveca,sparsevecb,startfromone))
+    if significance_weight:
+        i = len(set([i for i,v in vectora]) & set([i for i,v in vectorb]))
+        if i < significance_weight:
+            sim *= float(i) / float(significance_weight)
     return sim 
 
 def get_k_nearest_users(userid, dao, k = 200):

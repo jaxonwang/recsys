@@ -7,12 +7,8 @@ for i in range(1,1683):
     if len(a) == 0:
         print i
     else:
-        for i,s in a:
-            count.append(s)
+        for oi,s in a:
+            if s < 1:
+                count.append((s,oi,i))
 count.sort(reverse = True)
-tmp = []
-for i in range(0,len(count),2):
-    tmp.append(count[i])
-for i in tmp:
-    print i
-
+print count[:100]
