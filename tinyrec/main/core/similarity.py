@@ -42,11 +42,12 @@ def item_based_centralized_vector_similarity(vectora,vectorb,vec_len):
 
     centralie_vector(vectora)
     centralie_vector(vectorb)
+
     sparseveca = to_sparse_vector(vectora,vec_len)
     sparsevecb = to_sparse_vector(vectorb,vec_len)
 
     startfromone = not startfromzero
-    sim = abs(vec_sim(sparseveca,sparsevecb,startfromone))
+    sim = vec_sim(sparseveca,sparsevecb,startfromone)
     if significance_weight:
         i = len(set([i for i,v in vectora]) & set([i for i,v in vectorb]))
         if i < significance_weight:

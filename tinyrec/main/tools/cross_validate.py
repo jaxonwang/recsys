@@ -73,10 +73,8 @@ if __name__ == "__main__":
 
     config.Config().configdict['user_item_CF']['model'] = 'item-based' 
     config.Config().configdict['user_item_CF']['similarity'] = 'adjusted_cos' 
-    for i in range (100,150,10):
-        config.Config().configdict['user_item_CF']['significance_weight'] = i
-        config.Config().apply_changes()
-        print one_userbased_CF_validate(),i
+    config.Config().apply_changes()
+    print one_userbased_CF_validate()
 
     '''
     config.Config().configdict['user_item_CF']['model'] = 'item-based' 
