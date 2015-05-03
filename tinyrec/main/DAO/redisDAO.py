@@ -20,8 +20,11 @@ class redisDAO():
     def __init__(self,ip = cfgip,port = cfgport,db=cfgdb):
         self.conn = redis.Redis(ip,port,db)
 
-    def put_rate(self,userid,itemid,rating):
+    def put_user_rate(self,userid,itemid,rating):
         return self.conn.hset("u" + str(userid),itemid,rating)
+
+    def put_item_rate(self,itemid,userid,rating):
+        return self.conn.hset("i" + str(itemid),userid,rating)
 
     def get_item_list_by_user(self,userid):
         rawdict = self.conn.hgetall("u" + str(userid))

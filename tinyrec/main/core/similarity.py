@@ -27,7 +27,7 @@ def my_sparse_vector_similarity(vectora,vectorb,vec_len):
     sparsevecb = to_sparse_vector(vectorb,vec_len)
 
     startfromone = not startfromzero
-    sim = abs(vec_sim(sparseveca,sparsevecb,startfromone))
+    sim = vec_sim(sparseveca,sparsevecb,startfromone)
     if significance_weight:
         i = len(set([i for i,v in vectora]) & set([i for i,v in vectorb]))
         if i < significance_weight:
@@ -166,6 +166,12 @@ def get_other_item_sim(itemid, dao):
         print "No record for %d when calculating item similarity." % (itemid)
         return [] #return a empty list if there are no record for item
     
+    '''
+    if itemid == 50:
+        print item
+    else:
+        return []
+        '''
     for i in range(start,maxitemid + 1):
         if i == itemid:
             continue
