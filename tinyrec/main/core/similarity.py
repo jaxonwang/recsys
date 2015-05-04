@@ -36,12 +36,14 @@ def my_sparse_vector_similarity(vectora,vectorb,vec_len):
 
 def item_based_centralized_vector_similarity(vectora,vectorb,vec_len):
     def centralie_vector(v):
+        ret = []
         for i in range(len(v)):
             user_mean = user_mean_matrix[str(v[i][0])]
-            v[i] = (v[i][0],v[i][1] - user_mean)
+            ret.append((v[i][0],v[i][1] - user_mean))
+        return ret
 
-    centralie_vector(vectora)
-    centralie_vector(vectorb)
+    vectora = centralie_vector(vectora)
+    vectorb = centralie_vector(vectorb)
 
     sparseveca = to_sparse_vector(vectora,vec_len)
     sparsevecb = to_sparse_vector(vectorb,vec_len)

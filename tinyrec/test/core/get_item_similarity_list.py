@@ -14,7 +14,7 @@ sim.init_user_mean_matrix(dao)
 ri = 50
 ril = dao.get_user_list_by_item(ri)
 l = []
-for i in range(1,maxitemid + 1):
+for i in range(3,maxitemid + 1):
     il = dao.get_user_list_by_item(i)
     if il == []:
         continue
